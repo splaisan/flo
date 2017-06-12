@@ -146,7 +146,7 @@ Try creating an ooc file.
 code was added to the Rakefile that corresponds to the command
 
 sh "blat ../../data/#{target}.fa /dev/null /dev/null" \
-     " -tileSize=11 -makeOoc=run/target.11.ooc -repMatch=100"
+     " -tileSize=11 -makeOoc=11.ooc -repMatch=100"
 
 # ...
 
