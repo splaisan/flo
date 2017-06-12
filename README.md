@@ -150,7 +150,7 @@ sh "blat ../../data/#{target}.fa /dev/null /dev/null" \
 
 # ...
 
-Change the blat options in `ops.yaml` to
+Change the blat options in `opts.yaml` to
 
 "-noHead -fastMap -ooc=run/target.11.ooc -minScore=100 -minIdentity=98" \
 ```
