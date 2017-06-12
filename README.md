@@ -152,7 +152,7 @@ sh "blat ../../data/#{target}.fa /dev/null /dev/null" \
 
 Change the blat options in `ops.yaml` to
 
-"-noHead -fastMap -ooc=11.ooc -minScore=100 -minIdentity=98" \
+"-noHead -fastMap -ooc=run/target.11.ooc -minScore=100 -minIdentity=98" \
 ```
 
 ## Can I use flo for different species lift over / creating chain files
