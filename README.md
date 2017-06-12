@@ -143,15 +143,17 @@ If you want to use BAM format check out [`CrossMap`][4].
 Try creating an ooc file.
 
 ```
-sh "blat ../../data/#{SOURCE}.fa /dev/null /dev/null" \
+code was added to the Rakefile that corresponds to the command
+
+sh "blat ../../data/#{target}.fa /dev/null /dev/null" \
      " -tileSize=11 -makeOoc=11.ooc -repMatch=100"
 
 # ...
 
-"blat -noHead -fastMap -ooc=11.ooc -minScore=100 -minIdentity=98" \
-```
+Change the blat options in `ops.yaml` to
 
-You can do this in the `joblist` task.
+"-noHead -fastMap -ooc=11.ooc -minScore=100 -minIdentity=98" \
+```
 
 ## Can I use flo for different species lift over / creating chain files
 
