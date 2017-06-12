@@ -34,6 +34,11 @@ def to_sizes(twobit)
   sh "twoBitInfo #{twobit} stdout | sort -k2nr > #{twobit.ext('sizes')}"
 end
 
+def to_ooc(fas)
+  sh "blat #{fas} /dev/null /dev/null" \
+     " -tileSize=11 -makeOoc=#{fas.ext('11.ooc')} -repMatch=100"
+end
+
 def extract_cdna(fas, gff)
   sh "gt extractfeat -type exon -join -retainids -coords"                      \
      " -seqfile #{fas} -matchdescstart"                                        \
@@ -171,6 +176,8 @@ file 'run/liftover.chn' do
   to_sizes 'run/source.2bit'
   to_sizes 'run/target.2bit'
 
+  to_ooc 'run/target.fa'
+  
   # Partition target assembly.
   sh "faSplit sequence run/target.fa #{processes} run/chunk_"
 
