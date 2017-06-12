@@ -35,10 +35,11 @@ To use `flo` you must have Ruby 2.0 or higher.
 3. genometools - to validate, post-process, and extract sequences from the
    lifted GFF file.
 4. BioRuby gem - for parse GFF files for post-processing after lift over.
-5. rubygem-rake - for running the job (centos: sudo yum install rubygem-rake)
+5. rake gem - for running the job.
 
 Running `scripts/install.sh` will install 1-3 into `ext/` directory. For
-BioRuby gem, please run `gem install bio` or `sudo gem install bio`.
+BioRuby gem, please run `gem install bio` or `sudo gem install bio`. 
+Also install 'rake' with `gem install rake` or `sudo gem install rake`
 
 #### Tell flo about your data
 
