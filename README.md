@@ -145,14 +145,14 @@ Try creating an ooc file.
 ```
 code was added to the Rakefile that corresponds to the command
 
-sh "blat ../../data/#{target}.fa /dev/null /dev/null" \
+sh "blat ../../data/#{source}.fa /dev/null /dev/null" \
      " -tileSize=11 -makeOoc=11.ooc -repMatch=100"
 
 # ...
 
 Change the blat options in `opts.yaml` to
 
-"-noHead -fastMap -ooc=run/target.11.ooc -minScore=100 -minIdentity=98" \
+"-noHead -fastMap -ooc=run/source.11.ooc -minScore=100 -minIdentity=98" \
 ```
 
 ## Can I use flo for different species lift over / creating chain files
