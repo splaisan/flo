@@ -176,7 +176,7 @@ file 'run/liftover.chn' do
   to_sizes 'run/source.2bit'
   to_sizes 'run/target.2bit'
 
-  to_ooc 'run/target.fa'
+  to_ooc 'run/source.fa'
   
   # Partition target assembly.
   sh "faSplit sequence run/target.fa #{processes} run/chunk_"
