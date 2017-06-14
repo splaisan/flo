@@ -107,7 +107,7 @@ The chain file in the previous step is then filtered against the net file
 obtained above to get a lift over file that can be used for coordinate
 transformation.
 
-### Lift over
+### Lift over 
 
 With the above lift over file annotations on the old assembly can be
 transferred to the new assembly using `liftOver` tool.
