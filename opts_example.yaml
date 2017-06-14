@@ -34,8 +34,8 @@
 # The default string defined below is a suitable trade-off between running
 # time and sensitivity.
 # alt command with -ooc argument
-# :blat_opts: '-fastMap -ooc=run/target.11.ooc -minScore=100 -minIdentity=98'
-:blat_opts: '-fastMap -tileSize=12 -minIdentity=98'
+:blat_opts: '-fastMap -ooc=run/target.11.ooc -minScore=100 -minIdentity=98'
+#:blat_opts: '-fastMap -tileSize=12 -minIdentity=98'
 
 # Path to the GFF files containing annotations on the source assembly that
 # will be lifted to the target assembly.
