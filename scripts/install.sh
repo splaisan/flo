@@ -35,5 +35,5 @@ cd genometools-1.5.6
 make cairo=no errorcheck=no
 
 # warn about Ruby dependencies
-echo "# make sure >Ruby 2 is inatslled as well as two dependencies bio and rake"
+echo "# make sure Ruby version 2 is installed as well as the two gem packages bio and rake"
 echo "# you can install the gems with \'sudo gem install bio\' and \'sudo gem install rake\'"
