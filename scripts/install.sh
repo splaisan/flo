@@ -33,3 +33,7 @@ tar xvf v1.5.6.tar.gz
 rm v1.5.6.tar.gz
 cd genometools-1.5.6
 make cairo=no errorcheck=no
+
+# warn about Ruby dependencies
+echo "# make sure >Ruby 2 is inatslled as well as two dependencies bio and rake"
+echo "# you can install the gems with \'sudo gem install bio\' and \'sudo gem install rake\'"
