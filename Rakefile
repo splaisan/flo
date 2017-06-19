@@ -164,6 +164,10 @@ end
 file 'run/liftover.chn' do
   mkdir 'run'
 
+  # keep a copy of setup files
+  cp 'Rakefile', 'run/'
+  cp 'opts.yaml', 'run/'
+  
   processes = CONFIG[:processes]
   blat_opts = CONFIG[:blat_opts]
 
