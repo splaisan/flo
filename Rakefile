@@ -36,7 +36,7 @@ end
 
 def to_ooc(fas)
   sh "blat #{fas} /dev/null /dev/null" \
-     " -tileSize=11 -makeOoc=#{fas.ext('11.ooc')} -repMatch=100"
+     " -tileSize=11 -makeOoc=#{run_dir}/#{fas.ext('11.ooc')} -repMatch=100"
 end
 
 def extract_cdna(fas, gff)
@@ -151,74 +151,81 @@ def summarize(source, lifted, outdir)
 end
 
 def parallel(files, template)
+  run_dir = CONFIG[:run_dir]
   name = template.split.first
   jobs = files.map { |file| template % { :this => file } }
-  joblst = "run/joblst.#{name}"
-  joblog = "run/joblog.#{name}"
+  joblst = "#{run_dir}/joblst.#{name}"
+  joblog = "#{run_dir}/joblog.#{name}"
   File.write(joblst, jobs.join("\n"))
   sh "parallel --joblog #{joblog} -j #{jobs.length} -a #{joblst}"
 end
 
 ################################################################################
 
-file 'run/liftover.chn' do
-  mkdir 'run'
+
+file "create.liftover" do
+
+  run_dir = CONFIG[:run_dir]
+  mkdir "#{run_dir}"
 
   # keep a copy of setup files
-  cp 'Rakefile', 'run/'
-  cp 'opts.yaml', 'run/'
-  
+  cp 'Rakefile', "#{run_dir}/"
+  cp 'opts.yaml', "#{run_dir}/"
+
   processes = CONFIG[:processes]
   blat_opts = CONFIG[:blat_opts]
 
-  cp CONFIG[:source_fa], 'run/source.fa'
-  cp CONFIG[:target_fa], 'run/target.fa'
+  cp CONFIG[:source_fa], "#{run_dir}/source.fa"
+  cp CONFIG[:target_fa], "#{run_dir}/target.fa"
 
-  to_2bit 'run/source.fa'
-  to_2bit 'run/target.fa'
+  to_2bit "#{run_dir}/source.fa"
+  to_2bit "#{run_dir}/target.fa"
 
-  to_sizes 'run/source.2bit'
-  to_sizes 'run/target.2bit'
+  to_sizes "#{run_dir}/source.2bit"
+  to_sizes "#{run_dir}/target.2bit"
 
-  to_ooc 'run/source.fa'
+  to_ooc "#{run_dir}/source.fa"
   
   # Partition target assembly.
-  sh "faSplit sequence run/target.fa #{processes} run/chunk_"
+  sh "faSplit sequence #{run_dir}/target.fa #{processes} #{run_dir}/chunk_"
 
-  parallel Dir['run/chunk_*.fa'],
+  parallel Dir["#{run_dir}/chunk_*.fa"],
     'faSplit -oneFile size %{this} 5000 %{this}.5k -lift=%{this}.lft &&'       \
     'mv %{this}.5k.fa %{this}'
 
   # BLAT each chunk of the target assembly to the source assembly.
-  parallel Dir['run/chunk_*.fa'],
-    "blat -noHead #{blat_opts} run/source.fa %{this} %{this}.psl"
+  parallel Dir["#{run_dir}/chunk_*.fa"],
+    "blat -noHead -ooc=#{run_dir}/source.11.ooc #{blat_opts} #{run_dir}/source.fa %{this} %{this}.psl"
 
-  parallel Dir['run/chunk_*.fa'],
+  parallel Dir["#{run_dir}/chunk_*.fa"],
     "liftUp -type=.psl -pslQ -nohead"                                          \
     " %{this}.psl.lifted %{this}.lft warn %{this}.psl"
 
   # Derive a chain file each from BLAT's .psl output files.
-  parallel Dir['run/chunk_*.psl.lifted'],
-    'axtChain -psl -linearGap=medium'                                          \
-    ' %{this} run/source.2bit run/target.2bit %{this}.chn'
+  parallel Dir["#{run_dir}/chunk_*.psl.lifted"],
+    "axtChain -psl -linearGap=medium"                                          \
+    " %{this} #{run_dir}/source.2bit #{run_dir}/target.2bit %{this}.chn"
 
   # Sort the chain files.
-  parallel Dir["run/chunk_*.chn"],
+  parallel Dir["#{run_dir}/chunk_*.chn"],
     'chainSort %{this} %{this}.sorted'
 
   # Combine sorted chain files into a single sorted chain file.
-  sh 'chainMergeSort run/*.chn.sorted | chainSplit run stdin -lump=1'
-  mv 'run/000.chain', 'run/combined.chn.sorted'
+  sh 'chainMergeSort #{run_dir}/*.chn.sorted | chainSplit #{run_dir} stdin -lump=1'
+  mv "#{run_dir}/000.chain", "#{run_dir}/combined.chn.sorted"
 
   # Derive net file from combined, sorted chain file.
-  sh 'chainNet'                                                                \
-     ' run/combined.chn.sorted run/source.sizes run/target.sizes'              \
-     ' run/combined.chn.sorted.net /dev/null'
+  sh "chainNet"                                                                \
+     " #{run_dir}/combined.chn.sorted "                                        \
+     " #{run_dir}/source.sizes "                                               \
+     " #{run_dir}/target.sizes "                                                \
+     " #{run_dir}/combined.chn.sorted.net /dev/null"
 
   # Subset combined, sorted chain file.
-  sh 'netChainSubset'                                                          \
-     ' run/combined.chn.sorted.net run/combined.chn.sorted'                    \
-     ' run/liftover.chn'
+  sh "netChainSubset"                                                          \
+     " #{run_dir}/combined.chn.sorted.net "                                    \
+     " #{run_dir}/combined.chn.sorted'                                         \
+     " #{run_dir}/liftover.chn"
 end
 
 task 'default' do
@@ -230,23 +237,29 @@ task 'default' do
     add_to_PATH path
   end
 
-  Rake.application['run/liftover.chn'].invoke
+  # read user provided destination folder
+  run_dir = CONFIG[:run_dir]
+
+  Rake.application['create.liftover'].invoke
+  
   Array(CONFIG[:lift]).each do |inp|
-    outdir =
-      "#{File.basename(inp, '.gff3')}-liftover-"                               \
+    outdir = 
+      "#{run_dir}/#{File.basename(inp, '.gff3')}-liftover-"                    \
       "#{File.basename(CONFIG[:target_fa], '.fa')}"
-    mkdir outdir
+
+    mkdir "#{outdir}"
 
     out = "#{outdir}/#{outdir}.gff3"
 
     # Lift over the annotations from source assembly to target assembly.
-    sh "liftOver -gff #{inp} run/liftover.chn"                                 \
+    sh "liftOver -gff #{inp} #{run_dir}/liftover.chn"                          \
        " #{outdir}/lifted.gff3 #{outdir}/unlifted.gff3"
+
     process_gff "#{outdir}/lifted.gff3", out
 
-    extract_cdna('run/target.fa', out) if File.exist? inp.ext('cdna.fa')
-    extract_cds('run/target.fa', out) if File.exist? inp.ext('cds.fa')
-    extract_pep('run/target.fa', out) if File.exist? inp.ext('pep.fa')
+    extract_cdna("#{run_dir}/target.fa", out) if File.exist? inp.ext('cdna.fa')
+    extract_cds("#{run_dir}/target.fa", out) if File.exist? inp.ext('cds.fa')
+    extract_pep("#{run_dir}/target.fa", out) if File.exist? inp.ext('pep.fa')
 
     summarize inp, out, outdir
   end

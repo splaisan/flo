@@ -15,6 +15,8 @@
 # to the corresponding FASTA files (must end in .fa).
 :source_fa: 'unset'
 :target_fa: 'unset'
+# path to folder for results, default to 'run'
+:rundir: 'run'
 
 # Number of processes that will be used to parallelise flo. Ideally, this
 # will be the number of CPU cores you have.
@@ -34,11 +36,10 @@
 # The default string defined below is a suitable trade-off between running
 # time and sensitivity.
 # alt command with -ooc argument
-:blat_opts: '-fastMap -ooc=run/source.11.ooc -minScore=100 -minIdentity=98'
+:blat_opts: '-fastMap -minScore=100 -minIdentity=98'
 #:blat_opts: '-fastMap -tileSize=12 -minIdentity=98'
 
 # Path to the GFF files containing annotations on the source assembly that
 # will be lifted to the target assembly.
 :lift:
   - 'unset'
-
