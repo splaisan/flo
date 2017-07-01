@@ -1,6 +1,9 @@
 # Copyright 2015 Anurag Priyam - MIT License
 #
 # Same species, annotation lift over pipeline.
+# customized by Stephane Plaisance VIB-NC 2017
+# include .ooc creation for larger assemblies
+# include run_dir in opts.YAML
 #
 # Based on the lift over procedure deseribed at:
 # http://genomewiki.ucsc.edu/index.php/LiftOver_Howto &
@@ -36,7 +39,7 @@ end
 
 def to_ooc(fas)
   sh "blat #{fas} /dev/null /dev/null" \
-     " -tileSize=11 -makeOoc=#{run_dir}/#{fas.ext('11.ooc')} -repMatch=100"
+     " -tileSize=11 -makeOoc=#{fas.ext('11.ooc')} -repMatch=100"
 end
 
 def extract_cdna(fas, gff)
@@ -163,7 +166,7 @@ end
 ################################################################################
 
 
-file "create.liftover" do
+file "create/liftover" do
 
   run_dir = CONFIG[:run_dir]
   mkdir "#{run_dir}"
@@ -190,8 +193,8 @@ file "create.liftover" do
   sh "faSplit sequence #{run_dir}/target.fa #{processes} #{run_dir}/chunk_"
 
   parallel Dir["#{run_dir}/chunk_*.fa"],
-    'faSplit -oneFile size %{this} 5000 %{this}.5k -lift=%{this}.lft &&'       \
-    'mv %{this}.5k.fa %{this}'
+    "faSplit -oneFile size %{this} 5000 %{this}.5k -lift=%{this}.lft &&"       \
+    "mv %{this}.5k.fa %{this}"
 
   # BLAT each chunk of the target assembly to the source assembly.
   parallel Dir["#{run_dir}/chunk_*.fa"],
@@ -208,10 +211,10 @@ file "create.liftover" do
 
   # Sort the chain files.
   parallel Dir["#{run_dir}/chunk_*.chn"],
-    'chainSort %{this} %{this}.sorted'
+    "chainSort %{this} %{this}.sorted"
 
   # Combine sorted chain files into a single sorted chain file.
-  sh 'chainMergeSort #{run_dir}/*.chn.sorted | chainSplit #{run_dir} stdin -lump=1'
+  sh "chainMergeSort #{run_dir}/*.chn.sorted | chainSplit #{run_dir} stdin -lump=1"
   mv "#{run_dir}/000.chain", "#{run_dir}/combined.chn.sorted"
 
   # Derive net file from combined, sorted chain file.
@@ -224,7 +227,7 @@ file "create.liftover" do
   # Subset combined, sorted chain file.
   sh "netChainSubset"                                                          \
      " #{run_dir}/combined.chn.sorted.net "                                    \
-     " #{run_dir}/combined.chn.sorted'                                         \
+     " #{run_dir}/combined.chn.sorted"                                         \
      " #{run_dir}/liftover.chn"
 end
 
@@ -240,7 +243,7 @@ task 'default' do
   # read user provided destination folder
   run_dir = CONFIG[:run_dir]
 
-  Rake.application['create.liftover'].invoke
+  Rake.application['create/liftover'].invoke
   
   Array(CONFIG[:lift]).each do |inp|
     outdir = 
@@ -264,3 +267,4 @@ task 'default' do
     summarize inp, out, outdir
   end
 end
+
